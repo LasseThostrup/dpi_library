@@ -8,13 +8,13 @@
 
 #include "../../utils/Config.h"
 
-#include "../../dpi/RegistryClient.h"
-#include "../../dpi/RegistryServer.h"
-#include "../../dpi/BufferHandle.h"
-#include "../../dpi/NodeServer.h"
-#include "../../dpi/NodeClient.h"
-#include "../../dpi/RegistryClient.h"
-#include "../../dpi/BufferWriter.h"
+#include "../../dpi/memory/RegistryClient.h"
+#include "../../dpi/memory/RegistryServer.h"
+#include "../../dpi/memory/BufferHandle.h"
+#include "../../dpi/memory/NodeServer.h"
+#include "../../dpi/memory/NodeClient.h"
+#include "../../dpi/memory/RegistryClient.h"
+#include "../../dpi/memory/BufferWriter.h"
 
 #include <atomic>
 

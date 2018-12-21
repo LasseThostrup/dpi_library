@@ -10,5 +10,7 @@
 #define PERFTESTS_H_
 
 #include "DPIAppendBenchmark.h"
+#include "DPILatencyBenchmark.h"
+#include "DPIFlowInjectConsumeBenchmark.h"
 
 #endif /* PERFTESTS_H_ */

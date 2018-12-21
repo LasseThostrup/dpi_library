@@ -7,8 +7,8 @@
 #pragma once
 
 #include "../../memory-api/dpi.h"
-#include "../../dpi/RegistryServer.h"
-#include "../../dpi/NodeServer.h"
+#include "../../dpi/memory/RegistryServer.h"
+#include "../../dpi/memory/NodeServer.h"
 
 class AppendExamples : public CppUnit::TestFixture
 {

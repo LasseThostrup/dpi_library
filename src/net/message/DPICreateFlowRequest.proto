@@ -1,0 +1,8 @@
+syntax = "proto3";
+package dpi;
+
+message DPICreateFlowRequest {
+	string name = 1;
+	repeated uint64 targets = 2;
+	uint64 number_of_sources = 3;
+}

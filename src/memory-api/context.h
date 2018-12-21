@@ -8,9 +8,9 @@
 
 #include "../utils/Config.h"
 #include <unordered_map>
-#include "../dpi/BufferWriter.h"
-#include "../dpi/BufferReader.h"
-#include "../dpi/RegistryClient.h"
+#include "../dpi/memory/BufferWriter.h"
+#include "../dpi/memory/BufferReader.h"
+#include "../dpi/memory/RegistryClient.h"
 
 /**
  * @brief DPI_Context containing the objects needed for the different DPI operations

@@ -6,10 +6,10 @@
 
 #pragma once
 
-#include "../utils/Config.h"
+#include "../../utils/Config.h"
 
-#include "../net/proto/ProtoServer.h"
-#include "../net/rdma/RDMAClient.h"
+#include "../../net/proto/ProtoServer.h"
+#include "../../net/rdma/RDMAClient.h"
 #include "../message/MessageTypes.h"
 #include "../message/MessageErrors.h"
 #include "BufferHandle.h"
@@ -36,10 +36,14 @@ public:
      */
   void handle(Any *sendMsg, Any *respMsg);
 
+
+protected:
+  // Protected members
+  map<string, BufferHandle> m_bufferHandles;
+
 private:
   // Members
   RDMAClient *m_rdmaClient;
-  map<string, BufferHandle> m_bufferHandles;
   map<string, size_t> m_appendersJoinedBuffer;
 
   // Methods

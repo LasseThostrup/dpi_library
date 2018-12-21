@@ -13,9 +13,9 @@
 #include "../utils/StringHelper.h"
 #include "../thread/Thread.h"
 #include "../net/rdma/RDMAClient.h"
-#include "../dpi/NodeServer.h"
-#include "../dpi/RegistryServer.h"
-#include "../dpi/BufferWriter.h"
+#include "../dpi/memory/NodeServer.h"
+#include "../dpi/memory/RegistryServer.h"
+#include "../dpi/memory/BufferWriter.h"
 #include "BenchmarkRunner.h"
 
 #include <vector>
@@ -48,6 +48,7 @@ private:
   string m_conns;
   NodeID m_nodeId;
   int m_ctr = 0;
+  string bufferName = "buffer_benchmark";
 };
 
 
@@ -90,7 +91,7 @@ public:
   static bool signaled;
 
 private:
-
+  string bufferName = "buffer_benchmark";
   size_t m_serverPort;
   size_t m_size;
   size_t m_iter;

@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include "../utils/Config.h"
-#include "../utils/Network.h"
-#include "../net/rdma/RDMAClient.h"
+#include "../../utils/Config.h"
+#include "../../utils/Network.h"
+#include "../../net/rdma/RDMAClient.h"
 #include "RegistryClient.h"
 
 #include "BufferHandle.h"
@@ -29,7 +29,7 @@ struct InternalBuffer
 class BufferWriter
 {
 public:
-    virtual bool append(void *data, size_t size) = 0;
+    virtual bool append(void *data, size_t size, bool signaled = false) = 0;
     virtual bool close() = 0;
 };
 
@@ -93,7 +93,7 @@ class BufferWriterLat : public BufferWriter
     };
 
     //data: ptr to data, size: size in bytes. return: true if successful, false otherwise
-    bool append(void *data, size_t size)
+    bool append(void *data, size_t size, bool signaled = false)
     {
         if (writeableFreeSegments == 0)
         {
@@ -127,7 +127,7 @@ class BufferWriterLat : public BufferWriter
             ++segmentIndex;
         }
 
-        if (!writeToSegment(size, data, (writeableFreeSegments == 1 ? true : false)))
+        if (!writeToSegment(size, data, ((writeableFreeSegments == 1 ? true : false) || signaled )))
         {
             Logging::error(__FILE__, __LINE__, "BufferWriterBW failed to write to segment");
             return false;
@@ -242,11 +242,14 @@ class BufferWriterBW : public BufferWriter
             deleteRdmaClient = true;
         }
 
+        // std::cout << "Allocating for segment header..." << '\n';
         m_segmentHeader = (Config::DPI_SEGMENT_HEADER_t *)m_rdmaClient->localAlloc(sizeof(Config::DPI_SEGMENT_HEADER_t));
 
         //Read header
+        // std::cout << "Reading remote header..." << '\n';
         readHeaderFromRemote(m_localBufferSegment->offset); 
 
+        // std::cout << "Allocating internal buffer..." << '\n';
         m_internalBuffer = new InternalBuffer(m_rdmaClient->localAlloc(internalBufferSize), internalBufferSize);
     }
     ~BufferWriterBW()
@@ -260,7 +263,7 @@ class BufferWriterBW : public BufferWriter
     };
 
     //data: ptr to data, size: size in bytes. return: true if successful, false otherwise
-    bool append(void *data, size_t size)
+    bool append(void *data, size_t size, bool signaled = false)
     {
         // if (size > m_handle->segmentSizes)
         //     return false;
@@ -295,9 +298,9 @@ class BufferWriterBW : public BufferWriter
     {
         if (m_localBufferSegment->size < m_sizeUsed + size)
         {
-            Logging::debug(__FILE__, __LINE__, "Data does not fit into segment");
             //The data does not fit into segment, split it up --> write first part --> write the second part
             size_t firstPartSize = m_localBufferSegment->size - m_sizeUsed;
+            // Logging::debug(__FILE__, __LINE__, "Data does not fit into segment, firstPartSize: " + to_string(firstPartSize));
             if (firstPartSize > 0)
             {
                 if (!writeToSegment(*m_localBufferSegment, m_sizeUsed, firstPartSize, data))
@@ -362,7 +365,7 @@ class BufferWriterBW : public BufferWriter
     bool getNextSegment()
     {
         auto nextSegmentOffset = m_segmentHeader->nextSegmentOffset;
-        Logging::debug(__FILE__, __LINE__, "BufferWriterBW getting new segment (reuseSegments = true)");
+        Logging::debug(__FILE__, __LINE__, "BufferWriterBW getting new segment");
         //Set CanConsume flag on old segment
         m_segmentHeader->setConsumable(true);
         m_segmentHeader->setWriteable(false);

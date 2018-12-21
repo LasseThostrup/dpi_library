@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "../utils/Config.h"
+#include "../../utils/Config.h"
 #include "BufferWriter.h"
 #include "BufferReader.h"
 

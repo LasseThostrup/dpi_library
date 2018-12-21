@@ -15,6 +15,7 @@ string Config::DPI_REGISTRY_SERVER = "10.116.60.16";
 uint32_t Config::DPI_REGISTRY_PORT = 5300;
 uint32_t Config::DPI_NODE_PORT = 5400;
 
+
 /**
  * @brief Config::DPI_NODES collects the IP adress of each node participating
  * NOTE: The index of the vector corresponds to nodeid - 1
@@ -29,7 +30,14 @@ vector<string> Config::DPI_NODES = {  "10.116.60.16:"
 
 
 uint32_t Config::DPI_INTERNAL_BUFFER_SIZE = 1024 * 1024 * 1;
-uint32_t Config::DPI_SEGMENT_SIZE = (1024 * 1024 * 512) + sizeof(Config::DPI_SEGMENT_HEADER_t);
+uint32_t Config::DPI_SEGMENT_SIZE = (1024 * 1024 * 128) + sizeof(Config::DPI_SEGMENT_HEADER_t);
+uint32_t Config::DPI_SEGMENTS_PER_RING = 10;
+
+
+string Config::getBufferName(string& flowName, NodeID node_id){
+  return flowName + to_string(node_id);
+}
+
 
 //RDMA
 size_t Config::RDMA_MEMSIZE = 1024ul * 1024 * 1024 * 5;  //1GB

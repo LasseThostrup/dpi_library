@@ -15,7 +15,7 @@
 #include "./test/Tests.h"
 #include "./test/Test.h"
 #include "./thread/Thread.h"
-#include "./dpi/RegistryServer.h"
+#include "./dpi/memory/RegistryServer.h"
 
 #define no_argument 0
 #define required_argument 1
@@ -39,7 +39,8 @@ static void usage()
     cout << "202: \t dpi/TestRegistryClient" << endl;
     cout << "203: \t dpi/IntegrationTest" << endl;
     cout << "204: \t dpi/TestBufferIterator" << endl;
-    cout << "301: \t examples" << endl;
+    cout << "205: \t examples" << endl;
+    cout << "301: \t dpi/flow/TestFlowSource" << endl;
 
     cout << endl;
 }
@@ -104,8 +105,11 @@ static void runtest(int t)
     case 204:
         runner.addTest(TestBufferIterator::suite());
         break;
-    case 301:
+    case 205:
         runner.addTest(AppendExamples::suite());
+        break;
+    case 301:
+        runner.addTest(TestFlowSource::suite());
         break;
     default:
         cout << "No test with number " << t << " exists." << endl;

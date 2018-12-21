@@ -20,10 +20,12 @@
 #include "DPIAppendBufferResponse.pb.h"
 #include "DPIAllocSegmentsRequest.pb.h"
 #include "DPIAllocSegmentsResponse.pb.h"
+#include "DPICreateFlowRequest.pb.h"
+#include "DPICreateFlowResponse.pb.h"
 
 #include "ErrorMessage.pb.h"
 
-#include "../../dpi/BufferHandle.h"
+#include "../../dpi/memory/BufferHandle.h"
 
 #include <google/protobuf/any.pb.h>
 #include <google/protobuf/message.h>
@@ -93,6 +95,21 @@ public:
     // DPIAppendBufferRequest_Segment *segmentReq = appendBufferReq.add_segment();
     Any anyMessage;
     anyMessage.PackFrom(appendBufferReq);
+    return anyMessage;
+  }
+
+  static Any createDPICreateFlowRequest(string &name, std::vector<NodeID> &targets, size_t numberOfSources)
+  {
+    DPICreateFlowRequest createFlowRequest;
+    createFlowRequest.set_name(name);
+    for (auto &nodeID : targets)
+    {
+      createFlowRequest.add_targets(nodeID);
+    }
+    createFlowRequest.set_number_of_sources(numberOfSources);
+
+    Any anyMessage;
+    anyMessage.PackFrom(createFlowRequest);
     return anyMessage;
   }
 

@@ -146,6 +146,7 @@ class Config
     static uint32_t DPI_NODE_PORT;
     static uint32_t DPI_INTERNAL_BUFFER_SIZE;
     static uint32_t DPI_SEGMENT_SIZE;
+    static uint32_t DPI_SEGMENTS_PER_RING;
 
     /**
      * @brief Config::DPI_SEGMENT_HEADER_t describes the header of a segment
@@ -167,6 +168,8 @@ class Config
         bool isEndSegment() { return (segmentFlags & 0b0100) != 0; }
         void markEndSegment(bool endSegment = true) { segmentFlags = (endSegment ? segmentFlags | 0b0100 : segmentFlags & 0b1011); }
     };
+
+    static string getBufferName(string& flowName, NodeID target); 
 
 
     //RDMA

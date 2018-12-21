@@ -1,5 +1,7 @@
-set(TEST_DPI_SRC
 
+add_subdirectory(flow)
+
+set(TEST_DPI_SRC
 TestRegistryClient.h
 TestRegistryClient.cc
 TestBufferWriter.h
@@ -13,4 +15,4 @@ TestBufferIterator.cc
 add_library(test_dpi ${TEST_DPI_SRC})
 
 target_include_directories(test_dpi PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(test_dpi net_rdma dpi)
+target_link_libraries(test_dpi net_rdma memory_dpi)

@@ -14,6 +14,6 @@
 #include "dpi/IntegrationTestsAppend.h"
 #include "dpi/TestBufferIterator.h"
 #include "examples/append_examples.h"
-
+#include "dpi/flow/TestFlowSource.h"
 
 #endif /* TESTS_H_ */

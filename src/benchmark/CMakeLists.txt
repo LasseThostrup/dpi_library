@@ -3,6 +3,10 @@ set(BENCHMARK_SRC
   DPIAppendBenchmark.cc
   Benchmarks.h
   BenchmarkRunner.h
+  DPILatencyBenchmark.h
+  DPILatencyBenchmark.cc
+  DPIFlowInjectConsumeBenchmark.h
+  DPIFlowInjectConsumeBenchmark.cc
   
 ) # Adding headers required for portability reasons http://voices.canonical.com/jussi.pakkanen/2013/03/26/a-list-of-common-cmake-antipatterns/
 
@@ -11,5 +15,5 @@ add_library(benchmark ${BENCHMARK_SRC})
 target_include_directories(benchmark PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
   
 target_link_libraries(
-  benchmark net_rdma dpi thread
+  benchmark net_rdma memory_dpi thread flow_dpi
 )

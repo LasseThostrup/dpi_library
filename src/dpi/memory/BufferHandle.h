@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "../utils/Config.h"
+#include "../../utils/Config.h"
 #include "local_iterators/SegmentIterator.h"
 #include "local_iterators/BufferIterator.h"
 #include "BufferSegment.h"

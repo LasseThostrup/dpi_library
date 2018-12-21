@@ -12,6 +12,6 @@ set(API_SRC
 add_library(memory_api ${API_SRC})
 target_include_directories(memory_api PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(memory_api
-  dpi 
+  memory_dpi 
   net_rdma
   )

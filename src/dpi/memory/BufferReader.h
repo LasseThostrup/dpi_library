@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include "../utils/Config.h"
-#include "../utils/Network.h"
-#include "../net/rdma/RDMAClient.h"
+#include "../../utils/Config.h"
+#include "../../utils/Network.h"
+#include "../../net/rdma/RDMAClient.h"
 #include "RegistryClient.h"
 
 #include "BufferHandle.h"

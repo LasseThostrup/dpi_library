@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "../utils/Config.h"
-#include "../net/rdma/RDMAServer.h"
+#include "../../utils/Config.h"
+#include "../../net/rdma/RDMAServer.h"
 #include <mutex> // For std::unique_lock
 #include <shared_mutex>
 

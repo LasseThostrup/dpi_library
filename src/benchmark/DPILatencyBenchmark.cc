@@ -1,45 +1,52 @@
 
 
-#include "DPIAppendBenchmark.h"
+#include "DPILatencyBenchmark.h"
 
-mutex DPIAppendBenchmark::waitLock;
-condition_variable DPIAppendBenchmark::waitCv;
-bool DPIAppendBenchmark::signaled;
+mutex DPILatencyBenchmark::waitLock;
+condition_variable DPILatencyBenchmark::waitCv;
+bool DPILatencyBenchmark::signaled;
 
-DPIAppendBenchmarkThread::DPIAppendBenchmarkThread(NodeID nodeid, string &conns,
-                                                   size_t size, size_t iter, size_t numberAppenders)
+DPILatencyBenchmarkThread::DPILatencyBenchmarkThread(NodeID nodeid, string &conns,
+                                                     size_t size, size_t iter, size_t numberAppenders, bool signaled)
 {
   m_size = size;
   m_iter = iter;
   m_nodeId = nodeid;
   m_conns = conns;
-  
+  m_sendSignaled = signaled;
+  std::cout << "/* m_size */" << m_size << '\n';
+  std::cout << "/* iterations */" << iter << '\n';
+  std::cout << "Sending Signaled " << m_sendSignaled << '\n';
+
   BufferHandle *buffHandle;
   m_regClient = new RegistryClient();
 
   if (m_nodeId == 1)
   {
-    buffHandle = new BufferHandle(bufferName, m_nodeId, 10, numberAppenders, Config::DPI_SEGMENT_SIZE - sizeof(Config::DPI_SEGMENT_HEADER_t));
+    buffHandle = new BufferHandle(bufferName, m_nodeId, numberSegments, numberAppenders, m_size, BufferHandle::Buffertype::LAT);
     m_regClient->registerBuffer(buffHandle);
   }
-
-  m_bufferWriter = new BufferWriterBW(bufferName, m_regClient, Config::DPI_INTERNAL_BUFFER_SIZE);
-  std::cout << "DPI append Thread constructed" << '\n';
+  else
+  {
+    usleep(100000);
+  }
+  m_bufferWriter = new BWriter(bufferName, m_regClient, Config::DPI_INTERNAL_BUFFER_SIZE);
+  std::cout << "DPI " << benchmark << "Append Thread constructed" << '\n';
 }
 
-DPIAppendBenchmarkThread::~DPIAppendBenchmarkThread()
+DPILatencyBenchmarkThread::~DPILatencyBenchmarkThread()
 {
 }
 
-void DPIAppendBenchmarkThread::run()
+void DPILatencyBenchmarkThread::run()
 {
 
   std::cout << "DPI append Thread running" << '\n';
-  unique_lock<mutex> lck(DPIAppendBenchmark::waitLock);
-  if (!DPIAppendBenchmark::signaled)
+  unique_lock<mutex> lck(DPILatencyBenchmark::waitLock);
+  if (!DPILatencyBenchmark::signaled)
   {
     m_ready = true;
-    DPIAppendBenchmark::waitCv.wait(lck);
+    DPILatencyBenchmark::waitCv.wait(lck);
   }
   lck.unlock();
 
@@ -50,16 +57,17 @@ void DPIAppendBenchmarkThread::run()
   startTimer();
   for (size_t i = 0; i <= m_iter; i++)
   {
-    m_bufferWriter->append(scratchPad, m_size);
+    m_bufferWriter->append(scratchPad, m_size, m_sendSignaled);
   }
 
   m_bufferWriter->close();
+
   endTimer();
 }
 
-DPIAppendBenchmark::DPIAppendBenchmark(config_t config, bool isClient)
-    : DPIAppendBenchmark(config.server, config.port, config.data, config.iter,
-                         config.threads)
+DPILatencyBenchmark::DPILatencyBenchmark(config_t config, bool isClient)
+    : DPILatencyBenchmark(config.server, config.port, config.data, config.iter,
+                          config.threads)
 {
 
   Config::DPI_NODES.clear();
@@ -69,6 +77,8 @@ DPIAppendBenchmark::DPIAppendBenchmark(config_t config, bool isClient)
   Config::DPI_REGISTRY_SERVER = config.registryServer;
   Config::DPI_REGISTRY_PORT = config.registryPort;
   Config::DPI_INTERNAL_BUFFER_SIZE = config.internalBufSize;
+
+  m_sendSignaled = config.signaled;
 
   this->isClient(isClient);
 
@@ -85,21 +95,21 @@ DPIAppendBenchmark::DPIAppendBenchmark(config_t config, bool isClient)
   }
 }
 
-DPIAppendBenchmark::DPIAppendBenchmark(string &conns, size_t serverPort,
-                                       size_t size, size_t iter, size_t threads)
+DPILatencyBenchmark::DPILatencyBenchmark(string &conns, size_t serverPort,
+                                         size_t size, size_t iter, size_t threads)
 {
   m_conns = conns;
   m_serverPort = serverPort;
   m_size = size;
   m_iter = iter;
   m_numThreads = threads;
-  DPIAppendBenchmark::signaled = false;
+  DPILatencyBenchmark::signaled = false;
 
   std::cout << "Iterations in client" << m_iter << '\n';
   std::cout << "With " << m_size << " byte appends" << '\n';
 }
 
-DPIAppendBenchmark::~DPIAppendBenchmark()
+DPILatencyBenchmark::~DPILatencyBenchmark()
 {
   if (this->isClient())
   {
@@ -128,7 +138,7 @@ DPIAppendBenchmark::~DPIAppendBenchmark()
   }
 }
 
-void DPIAppendBenchmark::runServer()
+void DPILatencyBenchmark::runServer()
 {
   std::cout << "Starting DPI Server port " << m_serverPort << '\n';
 
@@ -136,16 +146,15 @@ void DPIAppendBenchmark::runServer()
 
   if (!m_nodeServer->startServer())
   {
-    throw invalid_argument("DPIAppendBenchmark could not start NodeServer!");
+    throw invalid_argument("DPILatencyBenchmark could not start NodeServer!");
   }
 
   m_regServer = new RegistryServer();
 
   if (!m_regServer->startServer())
   {
-    throw invalid_argument("DPIAppendBenchmark could not start RegistryServer!");
+    throw invalid_argument("DPILatencyBenchmark could not start RegistryServer!");
   }
-
 
   auto m_regClient = new RegistryClient();
   usleep(Config::DPI_SLEEP_INTERVAL);
@@ -158,13 +167,13 @@ void DPIAppendBenchmark::runServer()
   auto handle_ret = m_regClient->retrieveBuffer(bufferName);
 
 
-  BufferIterator bufferIterator = handle_ret->getIteratorLat((char *)m_nodeServer->getBuffer());
-  // DPILatencyBenchmarkBarrier barrier((char *)m_nodeServer->getBuffer(), handle_ret->entrySegments,bufferName);
+  BIter bufferIterator = handle_ret->getIteratorLat((char *)m_nodeServer->getBuffer());
+  DPILatencyBenchmarkBarrier barrier((char *)m_nodeServer->getBuffer(), handle_ret->entrySegments,bufferName);
   
-  // barrier.create();
+  barrier.create();
   std::cout << "Client Barrier created" << '\n';
   waitForUser();
-  // barrier.release();
+  barrier.release();
   int count = 0;
   std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 
@@ -184,17 +193,19 @@ void DPIAppendBenchmark::runServer()
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
   std::cout << "Benchmark took " << duration << "microseconds" << std::endl;
   std::cout << "Number of msgs " << count << std::endl;
+  std::cout << "Latency " << (double)( (double) duration / (double)count) << std::endl;
+  std::cout << "Mops " << (((double)count) / duration ) << std::endl;
 
 }
 
-void DPIAppendBenchmark::runClient()
+void DPILatencyBenchmark::runClient()
 {
   //start all client threads
   for (size_t i = 1; i <= m_numThreads; i++)
   {
-    DPIAppendBenchmarkThread *perfThread = new DPIAppendBenchmarkThread(i, m_conns,
-                                                                        m_size,
-                                                                        m_iter, m_numThreads);
+    DPILatencyBenchmarkThread *perfThread = new DPILatencyBenchmarkThread(i, m_conns,
+                                                                          m_size,
+                                                                          m_iter, m_numThreads, m_sendSignaled);
     perfThread->start();
     if (!perfThread->ready())
     {
@@ -208,10 +219,10 @@ void DPIAppendBenchmark::runClient()
   // usleep(10000000);
 
   //send signal to run benchmark
-  DPIAppendBenchmark::signaled = false;
-  unique_lock<mutex> lck(DPIAppendBenchmark::waitLock);
-  DPIAppendBenchmark::waitCv.notify_all();
-  DPIAppendBenchmark::signaled = true;
+  DPILatencyBenchmark::signaled = false;
+  unique_lock<mutex> lck(DPILatencyBenchmark::waitLock);
+  DPILatencyBenchmark::waitCv.notify_all();
+  DPILatencyBenchmark::signaled = true;
   lck.unlock();
   for (size_t i = 0; i < m_threads.size(); i++)
   {
@@ -219,7 +230,7 @@ void DPIAppendBenchmark::runClient()
   }
 }
 
-double DPIAppendBenchmark::time()
+double DPILatencyBenchmark::time()
 {
   uint128_t totalTime = 0;
   for (size_t i = 0; i < m_threads.size(); i++)

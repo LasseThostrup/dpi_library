@@ -4,7 +4,8 @@ add_subdirectory(utils)
 add_subdirectory(thread)
 add_subdirectory(net)
 add_subdirectory(test)
-add_subdirectory(dpi)
+add_subdirectory(dpi/memory)
+add_subdirectory(dpi/flow)
 add_subdirectory(benchmark)
 add_subdirectory(memory-api)
 
@@ -17,7 +18,7 @@ target_link_libraries(dpi_exe
   net_proto
   net_rdma
   test_lib
-  dpi
+  memory_dpi
   memory_api
 )
 
@@ -26,7 +27,7 @@ add_executable(dpi_bench BenchmarkMain.cc)
 target_link_libraries(dpi_bench
   benchmark
   utils
-  dpi
+  memory_dpi
   net_proto
   net_rdma
 )

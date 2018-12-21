@@ -30,6 +30,7 @@ target_link_libraries(dpi_tests
 	test_net
 	test_dpi
 	examples_dpi
+	test_dpi_flow
 	)
 	
 target_link_libraries(test_lib 
@@ -38,5 +39,6 @@ target_link_libraries(test_lib
 	test_net
 	test_dpi
 	examples_dpi
+	test_dpi_flow
 	)
 	
